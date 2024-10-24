@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from estates.forms import EstateForm
 from users.models import User
@@ -9,12 +8,13 @@ from estates.models import Estate
 def admin_only(view_func):
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated or request.user.role != 'admin':
-            return HttpResponseForbidden("You are not authorized to access this page.")
+            return redirect('estate_listings')
         return view_func(request, *args, **kwargs)
     return wrapper
 
+
 @login_required
-def estate_listing(request):
+def estateListingView(request):
     if not request.user.is_authenticated:
         return redirect('login_page')
     
@@ -27,11 +27,11 @@ def estate_listing(request):
 @admin_only
 def addEstateView(request):
     if request.method == 'POST':
-        form = EstateForm(request.POST)
+        form = EstateForm(request.POST,request.FILES)
 
         if form.is_valid():
             form.save()
-            return redirect('estates_listing')
+            return redirect('estate_listings')
     else:
         form = EstateForm()
     
@@ -44,11 +44,11 @@ def updateEstateView(request,pk):
     currentEstate = get_object_or_404(Estate,pk=pk)
 
     if request.method == 'POST':
-        form = EstateForm(request.POST,instance=currentEstate)
+        form = EstateForm(request.POST,request.FILES,instance=currentEstate)
 
         if form.is_valid():
             form.save()
-            return redirect('estates_listing')
+            return redirect('estate_listings')
     else:
         form = EstateForm(instance=currentEstate)
 
@@ -62,6 +62,12 @@ def deleteEstateView(request,pk):
 
     if request.method == 'POST':
         estateToBeDeleted.delete()
-        return redirect('estates_listing')
-    
-    return render(request,'estates/deleteEstate.html',{'estate':estateToBeDeleted})
+        return redirect('estate_listings')
+    else:
+        return redirect('estate_listings')
+
+
+@login_required
+def estateDetailView(request, pk):
+    estate = get_object_or_404(Estate, pk=pk)
+    return render(request, 'estates/estate_detail.html', {'estate': estate, 'user': request.user})

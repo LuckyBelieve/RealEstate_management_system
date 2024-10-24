@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Estate Listings
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+  <!-- Display estate property name as the title -->
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">
+    {{ estate.property_name }}
+  </h2>
+
+  <!-- Display the property image if it exists -->
+  {% if estate.property_image %}
+  <img
+    class="w-full h-[300px] rounded-lg mb-4"
+    src="{{ estate.property_image.url }}"
+    alt="Image of {{ estate.property_name }}"
+  />
+  {% else %}
+  <p class="text-gray-500 italic">No image available.</p>
+  {% endif %}
+
+  <!-- Display estate details -->
+  <p class="text-base text-gray-700 mb-2">
+    <span class="font-semibold">Address:</span> {{ estate.address }}
+  </p>
+  <p class="text-base text-gray-700 mb-2">
+    <span class="font-semibold">Owner:</span> {{ estate.owner }}
+  </p>
+  <p class="text-base text-gray-700 mb-2">
+    <span class="font-semibold">Property Type:</span> {{ estate.property_type }}
+  </p>
+  <p class="text-base text-gray-700 mb-2">
+    <span class="font-semibold">Rent Amount:</span> ${{ estate.rent_amount }}
+  </p>
+</div>
+{% endblock %}
