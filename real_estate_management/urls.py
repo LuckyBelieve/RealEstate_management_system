@@ -13,7 +13,8 @@ urlpatterns = [
     path("__reload__/", include("django_browser_reload.urls")),
     path('api/auth/', include('users.urls')),
     path('api/', include('estates.urls')),
-    path('api/', include('rentals.urls'))
+    path('api/', include('rentals.urls')),
+    path('api/agreements/', include('rentalAgreements.urls')),
 ]
 
 # Serve media files in development

@@ -15,36 +15,43 @@ def admin_only(view_func):
 
 @login_required
 def estateListingView(request):
-    if not request.user.is_authenticated:
-        return redirect('login_page')
-    
     user = request.user
-    estates = Estate.objects.all()
-    return render(request, 'estates/estates_listing.html',{'estates':estates,'user':user})
+    
+    # If user is admin, show only their created estates
+    if user.role == 'admin':
+        estates = Estate.objects.filter(owner=user)
+    # If user is client, show all estates
+    else:
+        estates = Estate.objects.all()
+    
+    return render(request, 'estates/estates_listing.html', {'estates': estates, 'user': user})
 
 
 @login_required
 @admin_only
 def addEstateView(request):
     if request.method == 'POST':
-        form = EstateForm(request.POST,request.FILES)
+        form = EstateForm(request.POST, request.FILES)
 
         if form.is_valid():
-            form.save()
+            estate = form.save(commit=False)  # Don't save to DB yet
+            estate.owner = request.user       # Set the owner to current admin
+            estate.save()                     # Now save to DB
             return redirect('estate_listings')
     else:
         form = EstateForm()
     
-    return render(request,'estates/estate_form.html',{'form':form})
+    return render(request, 'estates/estate_form.html', {'form': form})
 
 
 @login_required
 @admin_only
-def updateEstateView(request,pk):
-    currentEstate = get_object_or_404(Estate,pk=pk)
+def updateEstateView(request, pk):
+    # Get the estate and verify the current user is the owner
+    currentEstate = get_object_or_404(Estate, pk=pk, owner=request.user)
 
     if request.method == 'POST':
-        form = EstateForm(request.POST,request.FILES,instance=currentEstate)
+        form = EstateForm(request.POST, request.FILES, instance=currentEstate)
 
         if form.is_valid():
             form.save()
@@ -52,13 +59,14 @@ def updateEstateView(request,pk):
     else:
         form = EstateForm(instance=currentEstate)
 
-    return render(request, 'estates/estate_form.html',{'form':form})
+    return render(request, 'estates/estate_form.html', {'form': form})
 
 
 @login_required
 @admin_only
-def deleteEstateView(request,pk):
-    estateToBeDeleted = get_object_or_404(Estate, pk=pk)
+def deleteEstateView(request, pk):
+    # Get the estate and verify the current user is the owner
+    estateToBeDeleted = get_object_or_404(Estate, pk=pk, owner=request.user)
 
     if request.method == 'POST':
         estateToBeDeleted.delete()
@@ -70,4 +78,9 @@ def deleteEstateView(request,pk):
 @login_required
 def estateDetailView(request, pk):
     estate = get_object_or_404(Estate, pk=pk)
-    return render(request, 'estates/estate_detail.html', {'estate': estate, 'user': request.user})
+    context = {
+        'estate': estate,
+        'user': request.user,
+        'is_owner': request.user == estate.owner
+    }
+    return render(request, 'estates/estate_detail.html', context)
