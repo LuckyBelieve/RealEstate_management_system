@@ -4,6 +4,7 @@ from django.contrib import messages
 from estates.models import Estate
 from rentalAgreements.models import RentalAgreement
 from .forms import RentalAgreementForm
+from django.forms import ModelForm
 
 @login_required
 def create_rental_agreement(request, estate_id):
@@ -24,7 +25,7 @@ def create_rental_agreement(request, estate_id):
             rental_agreement.status = 'pending'  # Set initial status to pending
             rental_agreement.save()
             messages.success(request, "Rental agreement created successfully. Waiting for owner approval.")
-            return redirect('rental_agreement_detail', agreement_id=rental_agreement.id)
+            return redirect('rental_agreements:rental_agreement_detail', agreement_id=rental_agreement.id)
     else:
         form = RentalAgreementForm()
 
@@ -38,7 +39,7 @@ def update_rental_agreement(request, agreement_id):
     # Check if the user is the owner of the estate
     if request.user != rental_agreement.owner or request.user.role != 'admin':
         messages.error(request, "Only the owner of the estate can update the rental agreement.")
-        return redirect('rental_agreement_detail', agreement_id=agreement_id)
+        return redirect('rental_agreements:rental_agreement_detail', agreement_id=agreement_id)
 
     if request.method == 'POST':
         form = RentalAgreementForm(request.POST, instance=rental_agreement)
@@ -53,7 +54,7 @@ def update_rental_agreement(request, agreement_id):
                 updated_agreement.save()
                 messages.success(request, "Rental agreement updated successfully.")
             
-            return redirect('rental_agreement_detail', agreement_id=agreement_id)
+            return redirect('rental_agreements:rental_agreement_detail', agreement_id=agreement_id)
     else:
         form = RentalAgreementForm(instance=rental_agreement)
 
@@ -71,9 +72,30 @@ def update_rental_agreement_status(request, agreement_id):
     # Check if the user is the owner of the estate and an admin
     if request.user != rental_agreement.owner or request.user.role != 'admin':
         messages.error(request, "Only the owner of the estate can update the rental agreement status.")
-        return redirect('rental_agreement_detail', agreement_id=agreement_id)
+        return redirect('rental_agreements:rental_agreement_detail', agreement_id=agreement_id)
 
     if request.method == 'POST':
+        # Handle quick action buttons
+        if 'status' in request.POST:
+            new_status = request.POST.get('status')
+            
+            if new_status == 'active':
+                rental_agreement.activate()
+                messages.success(request, "Rental agreement has been activated.")
+            elif new_status == 'terminated':
+                rental_agreement.terminate()
+                messages.success(request, "Rental agreement has been terminated.")
+            elif new_status == 'expired':
+                rental_agreement.expire()
+                messages.success(request, "Rental agreement has been marked as expired.")
+            else:
+                rental_agreement.status = new_status
+                rental_agreement.save()
+                messages.success(request, f"Rental agreement status updated to {new_status}.")
+            
+            return redirect('rental_agreements:rental_agreement_detail', agreement_id=agreement_id)
+        
+        # Handle form submission
         form = RentalAgreementForm(request.POST, instance=rental_agreement)
         if form.is_valid():
             new_status = form.cleaned_data['status']
@@ -92,9 +114,15 @@ def update_rental_agreement_status(request, agreement_id):
                 rental_agreement.save()
                 messages.success(request, f"Rental agreement status updated to {new_status}.")
             
-            return redirect('rental_agreement_detail', agreement_id=agreement_id)
+            return redirect('rental_agreements:rental_agreement_detail', agreement_id=agreement_id)
     else:
-        form = RentalAgreementForm(instance=rental_agreement)
+        # Create a form with only the status field
+        class StatusOnlyForm(ModelForm):
+            class Meta:
+                model = RentalAgreement
+                fields = ['status']
+        
+        form = StatusOnlyForm(instance=rental_agreement)
 
     context = {
         'form': form,
@@ -121,7 +149,7 @@ def delete_rental_agreement(request, agreement_id):
     # Ensure only the owner can delete the agreement
     if request.user != rental_agreement.owner or request.user.role != 'admin':
         messages.error(request, "Only the owner of the estate can delete the rental agreement.")
-        return redirect('rental_agreement_detail', agreement_id=agreement_id)
+        return redirect('rental_agreements:rental_agreement_detail', agreement_id=agreement_id)
 
     if request.method == 'POST':
         estate_id = rental_agreement.estate.id

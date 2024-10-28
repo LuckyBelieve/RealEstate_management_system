@@ -1,85 +1,98 @@
 {% extends "base.html" %}
-{% block title %}
-  Estate Listings
-{% endblock %}
+{% block title %}Estate Listings{% endblock %}
 {% block content %}
-<div class="space-y-10 p-6">
-  <div class="flex flex-col md:flex-row items-center justify-between">
-    <h1 class="font-medium text-lg md:text-2xl text-black mb-4">
-      Estates Listings:
-    </h1>
-    {% if user.role == 'admin' %}
-    <a href="{% url 'add_estate' %}">
-      <button
-        class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 p-3 rounded-lg text-white"
-        type="button"
-      >
-        Add new Estate
-      </button>
-    </a>
-    {% endif %}
-  </div>
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold">Estate Listings</h1>
+        {% if user.role == 'admin' %}
+        <a href="{% url 'add_estate' %}" 
+           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            Add New Estate
+        </a>
+        {% endif %}
+    </div>
 
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm text-left text-gray-500 bg-white shadow-md rounded-lg overflow-hidden">
-      <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-        <tr class="text-left bg-gray-300">
-          <th scope="col" class="p-4">
-            <input
-              id="checkbox-all-search"
-              type="checkbox"
-              class="w-4 h-4 text-blue-600 bg-gray-100 rounded focus:ring-blue-500"
-            />
-            <label for="checkbox-all-search" class="sr-only">checkbox</label>
-          </th>
-          <th class="p-4 font-medium">#</th>
-          <th class="p-4 font-medium">Estate Name</th>
-          <th class="p-4 font-medium">Location</th>
-          <th class="p-4 font-medium">Admin</th>
-          <th class="p-4 font-medium">Type</th>
-          <th class="p-4 font-medium">Rent Amount</th>
-          <th class="p-4 font-medium">Actions</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-200">
-        {% for estate in estates %}
-        <tr class="bg-white border-b hover:bg-gray-50">
-          <td class="w-4 p-4">
-            <div class="flex items-center">
-              <input
-                type="checkbox"
-                class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-            </div>
-          </td>
-          <td class="p-4">{{ estate.id }}</td>
-          <td class="p-4">{{ estate.property_name }}</td>
-          <td class="p-4">{{ estate.address }}</td>
-          {% if estate.owner %}
-            <td class="p-4">
-              <p class="text-sm text-gray-500">{{ estate.owner.get_full_name|default:estate.owner.username }}</p>
-            </td>
-          {% else %}
-            <td class="p-4">
-              <p class="text-sm text-red-500">No owner assigned</p>
-            </td>
-          {% endif %}
-          <td class="p-4">{{ estate.property_type }}</td>
-          <td class="p-4">{{ estate.rent_amount }}</td>
-          <td class="p-4 flex space-x-2">
-            <a href="{% url 'estate_detail' estate.id %}" class="text-blue-500 hover:underline">View</a>
-            {% if user.role == 'admin' %}
-            <a href="{% url 'update_estate' estate.id %}" class="text-yellow-600 hover:underline">Update</a>
-            <form action="{% url 'delete_estate' estate.id %}" method="POST" class="inline-block">
-              {% csrf_token %}
-              <button type="submit" class="text-red-500 hover:underline">Delete</button>
-            </form>
-            {% endif %}
-          </td>
-        </tr>
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+            {{ message }}
+        </div>
         {% endfor %}
-      </tbody>
-    </table>
-  </div>
+    </div>
+    {% endif %}
+
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <table class="min-w-full table-auto">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estate Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admin</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rent Amount</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for estate in estates %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">{{ estate.id }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ estate.property_name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ estate.address }}</td>
+                    {% if estate.owner %}
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {{ estate.owner.get_full_name|default:estate.owner.username }}
+                        </td>
+                    {% else %}
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-red-500">No owner assigned</span>
+                        </td>
+                    {% endif %}
+                    <td class="px-6 py-4 whitespace-nowrap">{{ estate.property_type }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${{ estate.rent_amount }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <a href="{% url 'estate_detail' estate.id %}" 
+                           class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            View
+                        </a>
+                        
+                        {% if user.role == 'admin' %}
+                            <a href="{% url 'update_estate' estate.id %}" 
+                               class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Update
+                            </a>
+                            <form action="{% url 'delete_estate' estate.id %}" method="POST" class="inline-block">
+                                {% csrf_token %}
+                                <button type="submit" 
+                                        class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                    Delete
+                                </button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if not estates %}
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-blue-700">
+                        No estates found.
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

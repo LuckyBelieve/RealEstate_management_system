@@ -10,6 +10,7 @@
         {% endif %}
     </h1>
 
+
     {% if messages %}
     <div class="mb-6">
         {% for message in messages %}
@@ -72,9 +73,9 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">{{ agreement.estate.property_name }}</td>
                         {% if is_admin %}
-                            <td class="px-6 py-4 whitespace-nowrap">{{ agreement.tenant.get_full_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ agreement.tenant.username }}</td>
                         {% else %}
-                            <td class="px-6 py-4 whitespace-nowrap">{{ agreement.owner.get_full_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ agreement.owner.username }}</td>
                         {% endif %}
                         <td class="px-6 py-4 whitespace-nowrap">{{ agreement.start_date }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ agreement.end_date }}</td>
@@ -98,10 +99,6 @@
                                 <a href="{% url 'rental_agreements:update_rental_agreement' agreement.id %}" 
                                    class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                     Edit
-                                </a>
-                                <a href="{% url 'rental_agreements:update_rental_agreement_status' agreement.id %}" 
-                                   class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
-                                    Update Status
                                 </a>
                                 <a href="{% url 'rental_agreements:delete_rental_agreement' agreement.id %}" 
                                    class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">

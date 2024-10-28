@@ -109,6 +109,15 @@
               alt="estate"/>
             Estate</a
           >
+          <a
+            href="{% url 'rental_agreements:rental_agreement_list' %}"
+            class="text-white group flex items-center px-2 py-4 text-sm font-medium rounded-md"
+            >
+            <img class="h-8 w-8 rounded-full mr-2"
+              src="https://cdn-icons-png.freepik.com/512/8123/8123123.png?ga=GA1.1.566292907.1724415764"
+              alt="estate"/>
+            Agreements</a
+          >
         </nav>
         <form action="{% url 'logout' %}" method="post" class="mt-auto p-4">
           {% csrf_token %}
