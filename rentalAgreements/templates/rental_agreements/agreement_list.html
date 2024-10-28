@@ -71,16 +71,16 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for agreement in agreements %}
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">{{ agreement.estate.property_name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">{{ agreement.estate.property_name }}</td>
                         {% if is_admin %}
-                            <td class="px-6 py-4 whitespace-nowrap">{{ agreement.tenant.username }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ agreement.tenant.username }}</td>
                         {% else %}
-                            <td class="px-6 py-4 whitespace-nowrap">{{ agreement.owner.username }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ agreement.owner.username }}</td>
                         {% endif %}
-                        <td class="px-6 py-4 whitespace-nowrap">{{ agreement.start_date }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ agreement.end_date }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${{ agreement.monthly_rent }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">{{ agreement.start_date }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">{{ agreement.end_date }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">${{ agreement.monthly_rent }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                 {% if agreement.status == 'active' %}bg-green-100 text-green-800
                                 {% elif agreement.status == 'pending' %}bg-yellow-100 text-yellow-800
