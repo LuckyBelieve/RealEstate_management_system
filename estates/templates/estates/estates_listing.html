@@ -35,7 +35,7 @@
           <th class="p-4 font-medium">#</th>
           <th class="p-4 font-medium">Estate Name</th>
           <th class="p-4 font-medium">Location</th>
-          <th class="p-4 font-medium">Owner</th>
+          <th class="p-4 font-medium">Admin</th>
           <th class="p-4 font-medium">Type</th>
           <th class="p-4 font-medium">Rent Amount</th>
           <th class="p-4 font-medium">Actions</th>
@@ -55,7 +55,15 @@
           <td class="p-4">{{ estate.id }}</td>
           <td class="p-4">{{ estate.property_name }}</td>
           <td class="p-4">{{ estate.address }}</td>
-          <td class="p-4">{{ estate.owner }}</td>
+          {% if estate.owner %}
+            <td class="p-4">
+              <p class="text-sm text-gray-500">{{ estate.owner.get_full_name|default:estate.owner.username }}</p>
+            </td>
+          {% else %}
+            <td class="p-4">
+              <p class="text-sm text-red-500">No owner assigned</p>
+            </td>
+          {% endif %}
           <td class="p-4">{{ estate.property_type }}</td>
           <td class="p-4">{{ estate.rent_amount }}</td>
           <td class="p-4 flex space-x-2">

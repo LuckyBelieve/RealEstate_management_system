@@ -74,7 +74,7 @@ def update_rental_agreement_status(request, agreement_id):
         return redirect('rental_agreement_detail', agreement_id=agreement_id)
 
     if request.method == 'POST':
-        form = RentalAgreementStatusForm(request.POST, instance=rental_agreement)
+        form = RentalAgreementForm(request.POST, instance=rental_agreement)
         if form.is_valid():
             new_status = form.cleaned_data['status']
             
@@ -94,7 +94,7 @@ def update_rental_agreement_status(request, agreement_id):
             
             return redirect('rental_agreement_detail', agreement_id=agreement_id)
     else:
-        form = RentalAgreementStatusForm(instance=rental_agreement)
+        form = RentalAgreementForm(instance=rental_agreement)
 
     context = {
         'form': form,
@@ -110,7 +110,7 @@ def rental_agreement_detail(request, agreement_id):
     # Ensure only admin or tenant involved in the agreement can view it
     if request.user != rental_agreement.owner and request.user != rental_agreement.tenant:
         messages.error(request, "You don't have permission to view this rental agreement.")
-        return redirect('home')
+        return redirect('estate_listings')
 
     return render(request, 'rental_agreements/agreement_detail.html', {'agreement': rental_agreement})
 
@@ -130,3 +130,53 @@ def delete_rental_agreement(request, agreement_id):
         return redirect('estate_detail', estate_id=estate_id)
 
     return render(request, 'rental_agreements/delete_agreement.html', {'agreement': rental_agreement})
+
+@login_required
+def rental_agreement_list(request):
+    if request.user.role == 'admin':
+        # For admin users, show all agreements where they are the owner
+        agreements = RentalAgreement.objects.filter(owner=request.user).select_related(
+            'estate', 'tenant'
+        ).order_by('-start_date')
+        
+        # Get statistics for admin
+        stats = {
+            'total_agreements': agreements.count(),
+            'active_agreements': agreements.filter(status='active').count(),
+            'pending_agreements': agreements.filter(status='pending').count(),
+            'terminated_agreements': agreements.filter(status='terminated').count(),
+            'expired_agreements': agreements.filter(status='expired').count(),
+        }
+        
+        context = {
+            'agreements': agreements,
+            'stats': stats,
+            'is_admin': True
+        }
+        
+    elif request.user.role == 'client':
+        # For clients, show only their agreements
+        agreements = RentalAgreement.objects.filter(tenant=request.user).select_related(
+            'estate', 'owner'
+        ).order_by('-start_date')
+        
+        # Get statistics for client
+        stats = {
+            'total_agreements': agreements.count(),
+            'active_agreements': agreements.filter(status='active').count(),
+            'pending_agreements': agreements.filter(status='pending').count(),
+            'terminated_agreements': agreements.filter(status='terminated').count(),
+            'expired_agreements': agreements.filter(status='expired').count(),
+        }
+        
+        context = {
+            'agreements': agreements,
+            'stats': stats,
+            'is_admin': False
+        }
+        
+    else:
+        messages.error(request, "You don't have permission to view rental agreements.")
+        return redirect('estate_listings')
+
+    return render(request, 'rental_agreements/agreement_list.html', context)

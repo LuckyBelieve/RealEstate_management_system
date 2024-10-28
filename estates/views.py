@@ -19,11 +19,11 @@ def estateListingView(request):
     
     # If user is admin, show only their created estates
     if user.role == 'admin':
-        estates = Estate.objects.filter(owner=user)
+        estates = Estate.objects.filter(owner=user).select_related('owner')
     # If user is client, show all estates
     else:
-        estates = Estate.objects.all()
-    
+        estates = Estate.objects.all().select_related('owner')
+
     return render(request, 'estates/estates_listing.html', {'estates': estates, 'user': user})
 
 
