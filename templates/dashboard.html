@@ -78,10 +78,10 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         {% for estate in recent_estates %}
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">{{ estate.property_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ estate.address }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${{ estate.rent_amount }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ estate.property_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ estate.address }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">${{ estate.rent_amount }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                     {% if estate.is_available %}bg-green-100 text-green-800{% else %}bg-blue-100 text-blue-800{% endif %}">
                                     {% if estate.is_available %}Available{% else %}Rented{% endif %}
@@ -120,14 +120,14 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         {% for agreement in recent_agreements %}
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">{{ agreement.estate.property_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ agreement.estate.property_name }}</td>
                             {% if is_admin %}
-                                <td class="px-6 py-4 whitespace-nowrap">{{ agreement.tenant.username }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ agreement.tenant.username }}</td>
                             {% else %}
-                                <td class="px-6 py-4 whitespace-nowrap">{{ agreement.owner.username }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ agreement.owner.username }}</td>
                             {% endif %}
-                            <td class="px-6 py-4 whitespace-nowrap">{{ agreement.start_date }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ agreement.start_date }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                     {% if agreement.status == 'active' %}bg-green-100 text-green-800
                                     {% elif agreement.status == 'pending' %}bg-yellow-100 text-yellow-800
