@@ -2,7 +2,13 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from estates.forms import EstateForm
 from users.models import User
+from django.contrib import messages
 from estates.models import Estate
+from rentalAgreements.models import RentalAgreement
+from django.db.models import Count, Sum
+from django.db.models.functions import TruncMonth
+from datetime import datetime, timedelta
+from django.utils import timezone
 # Create your views here.
 
 def admin_only(view_func):
@@ -84,3 +90,41 @@ def estateDetailView(request, pk):
         'is_owner': request.user == estate.owner
     }
     return render(request, 'estates/estate_detail.html', context)
+
+
+@login_required
+def dashboard_view(request):
+    if request.user.role == 'admin':
+        # Get admin's estates and agreements
+        estates = Estate.objects.filter(owner=request.user)
+        agreements = RentalAgreement.objects.filter(owner=request.user)
+        
+        context = {
+            'total_estates': estates.count(),
+            'available_estates': estates.filter(status='available').count(),
+            'rented_estates': estates.filter(status='rented').count(),
+            'total_agreements': agreements.count(),
+            'active_agreements': agreements.filter(status='active').count(),
+            'pending_agreements': agreements.filter(status='pending').count(),
+            'recent_estates': estates.order_by('-created_at')[:5],
+            'recent_agreements': agreements.order_by('-created_at')[:5],
+            'is_admin': True
+        }
+    
+    elif request.user.role == 'client':
+        # Get client's agreements and related estates
+        agreements = RentalAgreement.objects.filter(tenant=request.user)
+        
+        context = {
+            'total_agreements': agreements.count(),
+            'active_agreements': agreements.filter(status='active').count(),
+            'pending_agreements': agreements.filter(status='pending').count(),
+            'recent_agreements': agreements.order_by('-created_at')[:5],
+            'is_admin': False
+        }
+    
+    else:
+        messages.error(request, "You don't have permission to access the dashboard.")
+        return redirect('home')
+
+    return render(request, 'estates/dashboard.html', context)

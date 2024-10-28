@@ -152,12 +152,11 @@ def delete_rental_agreement(request, agreement_id):
         return redirect('rental_agreements:rental_agreement_detail', agreement_id=agreement_id)
 
     if request.method == 'POST':
-        estate_id = rental_agreement.estate.id
         rental_agreement.delete()
         messages.success(request, "Rental agreement has been deleted successfully.")
-        return redirect('estate_detail', estate_id=estate_id)
-
-    return render(request, 'rental_agreements/delete_agreement.html', {'agreement': rental_agreement})
+        return redirect('rental_agreements:rental_agreement_list')
+    else:
+        return redirect('rental_agreements:rental_agreement_list')
 
 @login_required
 def rental_agreement_list(request):

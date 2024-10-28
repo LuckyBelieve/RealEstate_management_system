@@ -4,7 +4,7 @@ from .views import create_rental_agreement, rental_agreement_list, update_rental
 app_name = 'rental_agreements'
 
 urlpatterns = [
-     path('/list', rental_agreement_list, name='rental_agreement_list'),
+     path('list/', rental_agreement_list, name='rental_agreement_list'),
     path('create/<int:estate_id>/', create_rental_agreement, name='create_rental_agreement'),
     path('update/<int:agreement_id>/', update_rental_agreement, name='update_rental_agreement'),
     path('update-status/<int:agreement_id>/', update_rental_agreement_status, name='update_rental_agreement_status'),

@@ -4,7 +4,8 @@ from .views import (
     addEstateView,
     deleteEstateView,
     estateDetailView,
-    updateEstateView
+    updateEstateView,
+    dashboard_view
 )
 
 urlpatterns = [

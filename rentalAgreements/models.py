@@ -36,6 +36,7 @@ class RentalAgreement(models.Model):
         default='pending',
         db_index=True
     )
+    # created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Rental Agreement for {self.estate.property_name} - {self.tenant.username}"

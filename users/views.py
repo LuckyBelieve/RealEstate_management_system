@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -8,6 +9,10 @@ from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
+from django.contrib import messages
+
+from estates.models import Estate
+from rentalAgreements.models import RentalAgreement
 from .models import User
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password
@@ -86,11 +91,59 @@ def custom_login_required(view_func):
     return wrapper
 
 
-@custom_login_required
-def dashboard(request):
-    user = request.user
-    return render(request, 'dashboard.html', {'user': user})
 
+@login_required
+def dashboard_view(request):
+    if request.user.role == 'admin':
+        # Get admin's estates and agreements
+        estates = Estate.objects.filter(owner=request.user)
+        agreements = RentalAgreement.objects.filter(owner=request.user)
+        
+        # Calculate available and rented estates
+        available_estates = [estate for estate in estates if estate.is_available]
+        rented_estates = [estate for estate in estates if not estate.is_available]
+
+        context = {
+            # Estate statistics
+            'total_estates': estates.count(),
+            'available_estates': len(available_estates),
+            'rented_estates': len(rented_estates),
+
+            # Agreement statistics
+            'total_agreements': agreements.count(),
+            'active_agreements': agreements.filter(status='active').count(),
+            'pending_agreements': agreements.filter(status='pending').count(),
+            'terminated_agreements': agreements.filter(status='terminated').count(),
+            'expired_agreements': agreements.filter(status='expired').count(),
+
+            # Recent items (ordered by id since created_at doesn't exist)
+            'recent_estates': estates.order_by('-id')[:5],
+            'recent_agreements': agreements.order_by('-start_date')[:5],  # Using start_date instead of created_at
+            'is_admin': True
+        }
+    
+    elif request.user.role == 'client':
+        # Get client's agreements and related estates
+        agreements = RentalAgreement.objects.filter(tenant=request.user)
+        
+        context = {
+            # Agreement statistics
+            'total_agreements': agreements.count(),
+            'active_agreements': agreements.filter(status='active').count(),
+            'pending_agreements': agreements.filter(status='pending').count(),
+            'terminated_agreements': agreements.filter(status='terminated').count(),
+            'expired_agreements': agreements.filter(status='expired').count(),
+            
+            # Recent agreements (ordered by start_date)
+            'recent_agreements': agreements.order_by('-start_date')[:5],
+            'is_admin': False
+        }
+    
+    else:
+        messages.error(request, "You don't have permission to access the dashboard.")
+        return redirect('login_page')
+
+    return render(request, 'dashboard.html', context)
 
 def login_page(request):
     return render(request, 'auth/login.html')
