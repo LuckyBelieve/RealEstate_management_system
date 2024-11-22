@@ -1,16 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from estates.forms import EstateForm
-from users.models import User
 from django.contrib import messages
+from django.db import DatabaseError
 from estates.models import Estate
 from rentalAgreements.models import RentalAgreement
-from django.db.models import Count, Sum
-from django.db.models.functions import TruncMonth
-from datetime import datetime, timedelta
-from django.utils import timezone
-# Create your views here.
 
+
+# custom decorator to restrict functionality to admins only
 def admin_only(view_func):
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated or request.user.role != 'admin':
@@ -36,17 +33,30 @@ def estateListingView(request):
 @login_required
 @admin_only
 def addEstateView(request):
-    if request.method == 'POST':
-        form = EstateForm(request.POST, request.FILES)
+    try:
+        if request.method == 'POST':
+            form = EstateForm(request.POST, request.FILES)
 
-        if form.is_valid():
-            estate = form.save(commit=False)  # Don't save to DB yet
-            estate.owner = request.user       # Set the owner to current admin
-            estate.save()                     # Now save to DB
-            return redirect('estate_listings')
-    else:
-        form = EstateForm()
-    
+            if form.is_valid():
+                estate = form.save(commit=False)  # Don't save to DB yet
+                estate.owner = request.user  # Set the owner to current admin
+                estate.save()  # Now save to DB
+                return redirect('estate_listings')
+        else:
+            form = EstateForm()
+    except DatabaseError as e:
+        return render(request, 'estates/estate_form.html', {
+            'form': form,
+            'error': 'An error occurred while saving the estate. Please try again.'
+        })
+    except Exception as e:
+        # Handle any other unexpected errors
+        return render(request, 'estates/estate_form.html', {
+            'form': form,
+            'error': 'An unexpected error occurred. Please try again later.'
+        })
+
+    # Render the form template if the request is not POST or in case of failure
     return render(request, 'estates/estate_form.html', {'form': form})
 
 
