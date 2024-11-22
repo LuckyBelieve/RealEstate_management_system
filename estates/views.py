@@ -178,16 +178,35 @@ def dashboard_view(request):
     return render(request, '/dashboard.html', context)
 
 def get_chart_data(request):
-    estate_type_data = [
-        {'label': 'House', 'y': 5},
-        {'label': 'Apartment', 'y': 8},
-    ]
-    agreement_status_data = [
-        {'label': 'Active', 'y': 10},
-        {'label': 'Pending', 'y': 3},
-        {'label': 'Terminated', 'y': 2},
-    ]
-    return JsonResponse({
+
+    if request.user.role == 'admin':
+        # Get admin's estates and agreements
+        estates = Estate.objects.filter(owner=request.user)
+        agreements = RentalAgreement.objects.filter(owner=request.user)
+
+        # Data for charts
+        estate_type_counts = estates.values('property_type').annotate(count=Count('id'))
+        agreement_status_counts = agreements.values('status').annotate(count=Count('id'))
+
+        # Format data for the frontend
+        estate_type_data = [{'label': et['property_type'], 'y': et['count']} for et in estate_type_counts]
+        agreement_status_data = [{'label': as_['status'], 'y': as_['count']} for as_ in agreement_status_counts]
+
+        return JsonResponse({
         'estate_type_data': estate_type_data,
         'agreement_status_data': agreement_status_data,
-    })
+        })
+    # for the client
+    elif request.user.role == 'client':
+        # Get client's agreements and related estates
+        agreements = RentalAgreement.objects.filter(tenant=request.user)
+
+        # Data for charts
+        agreement_status_counts = agreements.values('status').annotate(count=Count('id'))
+
+         # Format data for the frontend
+        agreement_status_data = [{'label': as_['status'], 'y': as_['count']} for as_ in agreement_status_counts]
+
+        return JsonResponse({
+        'agreement_status_data': agreement_status_data,
+        })
