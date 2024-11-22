@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 from .views import (
     estateListingView,
     addEstateView,
@@ -14,4 +15,5 @@ urlpatterns = [
     path('v1/estates/update/<int:pk>/', updateEstateView, name='update_estate'),
     path('v1/estates/delete/<int:pk>/', deleteEstateView, name='delete_estate'),
     path('v1/estates/details/<int:pk>/', estateDetailView, name='estate_detail'),
+    path('get-chart-data/', views.get_chart_data, name='get_chart_data'),
 ]

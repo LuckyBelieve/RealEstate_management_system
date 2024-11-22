@@ -5,5 +5,6 @@ class RentalAgreementForm(forms.ModelForm):
     class Meta:
         model = RentalAgreement
         fields = ['start_date', 'end_date', 'monthly_rent', 'security_deposit']
-        # Exclude fields that will be set automatically
+        
+        # Excluded fields that would appear by default
         exclude = ['estate', 'tenant', 'owner', 'status']
