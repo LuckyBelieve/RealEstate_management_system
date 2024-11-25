@@ -6,7 +6,6 @@ from .views import (
     deleteEstateView,
     estateDetailView,
     updateEstateView,
-    dashboard_view
 )
 
 urlpatterns = [
