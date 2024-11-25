@@ -6,8 +6,6 @@ from django.db import DatabaseError
 from estates.models import Estate
 from rentalAgreements.models import RentalAgreement
 from django.db.models import Count
-from django.utils.safestring import mark_safe
-import json
 from django.http import JsonResponse
 
 
@@ -108,30 +106,10 @@ def estateDetailView(request, pk):
 
 @login_required
 def dashboard_view(request):
-    # Prepare data for charts
-    estate_type_data = [
-        {'label': 'House', 'y': 5},
-        {'label': 'Apartment', 'y': 8},
-    ]
-    agreement_status_data = [
-        {'label': 'Active', 'y': 10},
-        {'label': 'Pending', 'y': 3},
-        {'label': 'Terminated', 'y': 2},
-    ]
-
-
     if request.user.role == 'admin':
         # Get admin's estates and agreements
         estates = Estate.objects.filter(owner=request.user)
         agreements = RentalAgreement.objects.filter(owner=request.user)
-
-        # Data for charts
-        estate_type_counts = estates.values('property_type').annotate(count=Count('id'))
-        agreement_status_counts = agreements.values('status').annotate(count=Count('id'))
-        
-        # Format data for the frontend
-        estate_type_data = [{'label': et['property_type'], 'y': et['count']} for et in estate_type_counts]
-        agreement_status_data = [{'label': as_['status'], 'y': as_['count']} for as_ in agreement_status_counts]
 
         context = {
             'total_estates': estates.count(),
@@ -143,32 +121,17 @@ def dashboard_view(request):
             'recent_estates': estates.order_by('-created_at')[:5],
             'recent_agreements': agreements.order_by('-created_at')[:5],
             'is_admin': True,
-            # chart
-            'estate_type_data_json': mark_safe(json.dumps(estate_type_data)),
-            'agreement_status_data_json': mark_safe(json.dumps(agreement_status_data)),
-            'estate_type_data': estate_type_data,
-            'agreement_status_data': agreement_status_data,
         }
     
     elif request.user.role == 'client':
         # Get client's agreements and related estates
         agreements = RentalAgreement.objects.filter(tenant=request.user)
-
-        # Data for charts
-        agreement_status_counts = agreements.values('status').annotate(count=Count('id'))
-
-         # Format data for the frontend
-        agreement_status_data = [{'label': as_['status'], 'y': as_['count']} for as_ in agreement_status_counts]
-        
         context = {
             'total_agreements': agreements.count(),
             'active_agreements': agreements.filter(status='active').count(),
             'pending_agreements': agreements.filter(status='pending').count(),
             'recent_agreements': agreements.order_by('-created_at')[:5],
             'is_admin': False,
-            # chart
-            'agreement_status_data_json': mark_safe(json.dumps(agreement_status_data)),
-            'agreement_status_data': agreement_status_data,
         }
     
     else:
@@ -197,7 +160,7 @@ def get_chart_data(request):
         'agreement_status_data': agreement_status_data,
         })
     # for the client
-    elif request.user.role == 'client':
+    else:
         # Get client's agreements and related estates
         agreements = RentalAgreement.objects.filter(tenant=request.user)
 

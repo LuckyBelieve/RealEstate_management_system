@@ -34,11 +34,11 @@
         </div>
         <div class="flex items-center gap-5 pt-5">
             <div class="w-[50%] flex flex-col bg-white p-3 rounded-sm overflow-hidden">
-                <h5 class="text-gray-600 text-sm font-medium">Total Agreements</h5>
+                <h5 class="text-gray-600 text-sm font-medium">Estates</h5>
                 <div id="estate-type-chart" style="height: 300px; width: 100%;"></div>
             </div>
             <div class="w-[50%] bg-white p-3 rounded-sm overflow-hidden">
-                <h5 class="text-gray-600 text-sm font-medium">Total Agreements</h5>
+                <h5 class="text-gray-600 text-sm font-medium">Agreements</h5>
                 <div id="agreement-status-chart" style="height: 300px; width: 100%;"></div>
             </div>
         </div>
@@ -66,12 +66,6 @@
                 <p class="text-2xl font-bold text-red-600">{{ terminated_agreements }}</p>
             </div>
         </div>
-        {% if not is_admin %}
-            <div class="w-[50%] flex flex-col bg-white p-3 rounded-sm overflow-hidden">
-                <h5 class="text-gray-600 text-sm font-medium">Total Agreements</h5>
-                <div id="estate-type-chart" style="height: 300px; width: 100%;"></div>
-            </div>
-        {% endif %}
     </div>
     <!-- Recent Items -->
     <div class="grid grid-cols-1 gap-8">
@@ -162,10 +156,6 @@
             </div>
         </div>
     </div>
-    <div id="chart-container"
-     data-estate-type-data="{{ estate_type_data_json|safe }}"
-     data-agreement-status-data="{{ agreement_status_data_json|safe }}">
-</div>
 </div>
 <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 <script>
