@@ -5,6 +5,10 @@ from estates.models import Estate
 from rentalAgreements.models import RentalAgreement
 from .forms import RentalAgreementForm
 from django.forms import ModelForm
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .serializers import RentalAgreementSerializer
+
 
 @login_required
 def create_rental_agreement(request, estate_id):
@@ -207,3 +211,13 @@ def rental_agreement_list(request):
         return redirect('estate_listings')
 
     return render(request, 'rental_agreements/agreement_list.html', context)
+
+# getting the rental agreements in json format
+class RentalAgreementListView(APIView):
+    def get(self, request):
+        # Fetching the rental agreements with related estates objects
+        agreementsData = RentalAgreement.objects.select_related('estate').all()
+        serializer = RentalAgreementSerializer(agreementsData, many=True)
+        
+        agreements = {"agreements":serializer.data}
+        return Response(agreements)

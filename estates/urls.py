@@ -6,6 +6,7 @@ from .views import (
     deleteEstateView,
     estateDetailView,
     updateEstateView,
+    EstatesListView
 )
 
 urlpatterns = [
@@ -15,4 +16,5 @@ urlpatterns = [
     path('v1/estates/delete/<int:pk>/', deleteEstateView, name='delete_estate'),
     path('v1/estates/details/<int:pk>/', estateDetailView, name='estate_detail'),
     path('get-chart-data/', views.get_chart_data, name='get_chart_data'),
+    path('estates/all',EstatesListView.as_view(),name="estates_list")
 ]

@@ -6,7 +6,10 @@ from django.db import DatabaseError
 from estates.models import Estate
 from rentalAgreements.models import RentalAgreement
 from django.db.models import Count
+from rest_framework.views import APIView
 from django.http import JsonResponse
+from rest_framework.response import Response
+from .serializers import EstateSerializer
 
 
 # custom decorator to restrict functionality to admins only
@@ -173,3 +176,12 @@ def get_chart_data(request):
         return JsonResponse({
         'agreement_status_data': agreement_status_data,
         })
+    
+# getting relations data
+class EstatesListView(APIView):
+    def get(self, request):
+        # Fetching the rental agreements with related estates objects
+        estates = Estate.objects.select_related('owner').all()
+        serializer = EstateSerializer(estates, many=True)
+        estates = { "estates":serializer.data }
+        return Response(estates)

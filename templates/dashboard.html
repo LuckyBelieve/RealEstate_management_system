@@ -163,6 +163,7 @@
         fetch('http://127.0.0.1:8000/api/get-chart-data/')
             .then(response => response.json())
             .then(data => {
+                console.log(data);
                 var estateTypeData = data.estate_type_data;
                 var agreementStatusData = data.agreement_status_data;
 
