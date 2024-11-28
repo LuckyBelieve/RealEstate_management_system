@@ -16,7 +16,7 @@ from rentalAgreements.models import RentalAgreement
 from .models import User
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password
-from .serializers import UserSerializer
+from .serializers import UserSerializer, CustomUserSerializer
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -151,4 +151,11 @@ def login_page(request):
 
 def register_page(request):
     return render(request, 'auth/register.html')
+
+class UserListView(APIView):
+    def get(self, request):
+        users = User.objects.all()  # Fetch all users
+        serializer = CustomUserSerializer(users, many=True)  # Serialize the queryset
+        userResponse = { "users":serializer.data }
+        return Response(userResponse)
 
